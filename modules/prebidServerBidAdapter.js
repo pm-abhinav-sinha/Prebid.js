@@ -6,6 +6,7 @@ import { ajax } from 'src/ajax';
 import { STATUS } from 'src/constants';
 import { queueSync, persist } from 'src/cookie';
 import adaptermanager from 'src/adaptermanager';
+import { getDebugStatus } from 'src/config';
 
 const TYPE = 's2s';
 const cookiePersistMessage = `Your browser may be blocking 3rd party cookies. By clicking on this page you allow Prebid Server and other advertising partners to place cookies to help us advertise. You can opt out of their cookies <a href="https://www.appnexus.com/en/company/platform-privacy-policy#choices" target="_blank">here</a>.`;
@@ -75,7 +76,7 @@ function PrebidServer() {
 
   /* Prebid executes this function when the page asks to send out bid requests */
   baseAdapter.callBids = function(bidRequest) {
-    const isDebug = !!$$PREBID_GLOBAL$$.logging;
+    const isDebug = !!getDebugStatus();
     convertTypes(bidRequest.ad_units);
     let requestJson = {
       account_id: config.accountId,
