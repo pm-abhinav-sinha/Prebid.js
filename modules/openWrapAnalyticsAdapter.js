@@ -6,11 +6,10 @@ var utils = require('src/utils');
 const OPENWRAP_BIDDER_CODE = 'openwrapanalytics';
 const analyticsType = 'endpoint';
 const OPENWRAP_ANALYTICS_URL = '//t.pubmatic.com/';
-//const MAX_PAGE_URL_LEN=512;
 
 var events = {};
 var configOptions={"publisherId":'0000'}
-//var pageURL = ( frame !== window.top && frame.document.referrer != ""  ? frame.document.referrer : frame.location.href).substr(0, MAX_PAGE_URL_LEN );
+
 var openWrapAnalyticsAdapter = Object.assign(adapter(
   {
     OPENWRAP_ANALYTICS_URL,
@@ -22,40 +21,22 @@ var openWrapAnalyticsAdapter = Object.assign(adapter(
         events[eventType] = args;
       }
 
-      if (eventType === 'auctionEnd') { //TODO: should use constants
-        setTimeout(function() {
-          ajax(
-            //OPENWRAP_ANALYTICS_URL 
-            OPENWRAP_ANALYTICS_URL+"/wl/?pubid="+configOptions.publisherId+"&json="+JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
-            {
-              success: function() {},
-              error: function() {}
-            },undefined,//JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
-            {
-              method: 'GET'
-              //method: 'POST'
-            }
-          );
-        }, 3000);
+      if (eventType === 'auctionEnd') {//TODO: should use constants
+          var protocol = (document.location.protocol === 'https:') ? 'https:' : 'http:';
+          var url=protocol+OPENWRAP_ANALYTICS_URL+"wl/?pubid="+configOptions.publisherId+"&json="+JSON.stringify(formatBidResponse(pbjs.getBidResponses()));
+          setTimeout(function() {
+            var img = new window.Image();
+            img.src = url;
+          }, 3000);
       }else if(eventType === 'bidWon') {//TODO: should use constants
           var windata= formatWinBidResponse(pbjs.getAllWinningBids());
           console.log(windata);
           for (var i = 0; i < windata.length; i++) {
             var url=OPENWRAP_ANALYTICS_URL+"wt/?"+windata[i];
             setTimeout(function() {
-            ajax(
-              //OPENWRAP_ANALYTICS_URL 
-              url,
-              {
-                success: function() {},
-                error: function() {}
-              },undefined,//JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
-              {
-                method: 'GET'
-                //method: 'POST'
-              }
-            );
-          }, 3000);
+              var img = new window.Image();
+              img.src = url;
+            }, 3000);
             
         };
 
