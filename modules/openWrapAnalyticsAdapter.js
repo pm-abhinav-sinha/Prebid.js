@@ -5,8 +5,7 @@ var utils = require('src/utils');
 
 const OPENWRAP_BIDDER_CODE = 'openwrapanalytics';
 const analyticsType = 'endpoint';
-const OPENWRAP_VERSION = '7';
-const OPENWRAP_ANALYTICS_URL = '//analytics-pubmatic.com/';
+const OPENWRAP_ANALYTICS_URL = '//t.pubmatic.com/';
 //const MAX_PAGE_URL_LEN=512;
 
 var events = {};
@@ -23,29 +22,49 @@ var openWrapAnalyticsAdapter = Object.assign(adapter(
         events[eventType] = args;
       }
 
-      if (eventType === 'auctionEnd') {
+      if (eventType === 'auctionEnd') { //TODO: should use constants
         setTimeout(function() {
           ajax(
             //OPENWRAP_ANALYTICS_URL 
-            OPENWRAP_ANALYTICS_URL+"?pubid="+configOptions.publisherId+"&json="+JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
+            OPENWRAP_ANALYTICS_URL+"/wl/?pubid="+configOptions.publisherId+"&json="+JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
             {
               success: function() {},
               error: function() {}
-            },
-            //JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
+            },undefined,//JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
             {
               method: 'GET'
               //method: 'POST'
             }
           );
         }, 3000);
+      }else if(eventType === 'bidWon') {//TODO: should use constants
+          var windata= formatWinBidResponse(pbjs.getAllWinningBids());
+          console.log(windata);
+          for (var i = 0; i < windata.length; i++) {
+            var url=OPENWRAP_ANALYTICS_URL+"wt/?"+windata[i];
+            setTimeout(function() {
+            ajax(
+              //OPENWRAP_ANALYTICS_URL 
+              url,
+              {
+                success: function() {},
+                error: function() {}
+              },undefined,//JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
+              {
+                method: 'GET'
+                //method: 'POST'
+              }
+            );
+          }, 3000);
+            
+        };
+
       }
     }
   }
 );
 
 function formatBidResponse(bidResponses){
-  var uuid=generateUUID();
   var date = new Date();
   var tst = Math.round( date.getTime()/1000 );
   var logData={
@@ -55,16 +74,19 @@ function formatBidResponse(bidResponses){
     "tst": tst,
     "pid": "0",
     "pdvid": "0",
-    "iid": uuid,
+    //"iid": uuid,
     "src": "2",
     "sv": "prebid"+pbjs.version
   }
+  var iid="";
   var bidinfoarray=[];
   for (var key in bidResponses) {
    if (bidResponses.hasOwnProperty(key)) {
       var bids=bidResponses[key].bids;
       for (var i = 0; i < bidResponses[key].bids.length; i++) {
+      iid=bids[i].requestId;
       var bidinfo={
+
         "sn": bids[i].adUnitCode,
         "sz": [bids[i].width+"x"+bids[i].height],
         "ps": [{
@@ -90,40 +112,25 @@ function formatBidResponse(bidResponses){
    }
   }
   logData["s"]=bidinfoarray;
+  logData["iid"]=iid;
   return logData;
 
 };
-function generateUUID(){
-  var d = new window.Date().getTime(),
-      // todo: this.pageURL ???
-    url = window.decodeURIComponent(utils.getTopWindowUrl()).toLowerCase().replace(/[^a-z,A-Z,0-9]/gi, ""),
-    urlLength = url.length
-    ;
 
-    //todo: uncomment it,  what abt performance
-    //if(win.performance && this.isFunction(win.performance.now)){
-    //    d += performance.now();
-    //}
 
-  var uuid = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx-zzzzz".replace(/[xyz]/g, function(c) {
-    var r = (d + Math.random()*16)%16 | 0;
-    d = Math.floor(d/16);
-    var op;
-    switch(c){
-    case "x":
-      op = r;
-      break;
-    case "z":
-      op = url[Math.floor(Math.random()*urlLength)];
-      break;
-    default:
-      op = (r&0x3|0x8);
+function formatWinBidResponse(bidResponses){
+  
+  var date = new Date();
+  var tst = Math.round( date.getTime()/1000 );
+  var logData=[];
+  var bidinfoarray=[];
+
+  for (var i = 0; i < bidResponses.length; i++) {
+        var data="pubid="+configOptions.publisherId+"&purl="+ utils.getTopWindowUrl()+"&pwtv=0&profileid=0&tst="+tst+"&iid="+bidResponses[i].requestId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm+"&kgpv="+bidResponses[i].adUnitCode;
+        logData[i]=data;
     }
+  return logData;
 
-    return op.toString(16);
-  });
-
-  return uuid;
 };
 
 openWrapAnalyticsAdapter.adapterEnableAnalytics = openWrapAnalyticsAdapter.enableAnalytics;
