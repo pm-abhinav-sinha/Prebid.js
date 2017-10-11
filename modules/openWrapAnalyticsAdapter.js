@@ -26,14 +26,16 @@ var openWrapAnalyticsAdapter = Object.assign(adapter(
       if (eventType === 'auctionEnd') {
         setTimeout(function() {
           ajax(
-            OPENWRAP_ANALYTICS_URL,
+            //OPENWRAP_ANALYTICS_URL 
+            OPENWRAP_ANALYTICS_URL+"?pubid="+configOptions.publisherId+"&json="+JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
             {
               success: function() {},
               error: function() {}
             },
-            JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
+            //JSON.stringify(formatBidResponse(pbjs.getBidResponses())),
             {
-              method: 'POST'
+              method: 'GET'
+              //method: 'POST'
             }
           );
         }, 3000);
