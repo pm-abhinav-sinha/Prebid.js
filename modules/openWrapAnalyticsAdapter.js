@@ -6,7 +6,6 @@ var utils = require('src/utils');
 const OPENWRAP_BIDDER_CODE = 'openwrapanalytics';
 const analyticsType = 'endpoint';
 const OPENWRAP_ANALYTICS_URL = '//t.pubmatic.com/';
-
 var events = {};
 var configOptions={"publisherId":'0000'}
 
@@ -23,14 +22,14 @@ var openWrapAnalyticsAdapter = Object.assign(adapter(
 
       if (eventType === 'auctionEnd') {//TODO: should use constants
           var protocol = (document.location.protocol === 'https:') ? 'https:' : 'http:';
-          var url=protocol+OPENWRAP_ANALYTICS_URL+"wl/?pubid="+configOptions.publisherId+"&json="+JSON.stringify(formatBidResponse(pbjs.getBidResponses()));
+          var url=protocol+OPENWRAP_ANALYTICS_URL+"wl/?pubid="+configOptions.publisherId+"&json="+window.encodeURIComponent(JSON.stringify(formatBidResponse(pbjs.getBidResponses())));
           setTimeout(function() {
             var img = new window.Image();
             img.src = url;
           }, 3000);
       }else if(eventType === 'bidWon') {//TODO: should use constants
           var windata= formatWinBidResponse(pbjs.getAllWinningBids());
-          console.log(windata);
+          //console.log(windata);
           for (var i = 0; i < windata.length; i++) {
             var url=OPENWRAP_ANALYTICS_URL+"wt/?"+windata[i];
             setTimeout(function() {
@@ -58,19 +57,22 @@ function formatBidResponse(bidResponses){
     //"iid": uuid,
     "src": "2",
     "sv": "prebid"+pbjs.version
-  }
+  };
   var iid="";
   var bidinfoarray=[];
   for (var key in bidResponses) {
    if (bidResponses.hasOwnProperty(key)) {
       var bids=bidResponses[key].bids;
+      var psArray=[];
+      var bidinfo={};
       for (var i = 0; i < bidResponses[key].bids.length; i++) {
       iid=bids[i].requestId;
-      var bidinfo={
-
-        "sn": bids[i].adUnitCode,
-        "sz": [bids[i].width+"x"+bids[i].height],
-        "ps": [{
+      var to=0;
+      bidinfo={"sn": bids[0].adUnitCode,"sz": [bids[0].width+"x"+bids[0].height]}; // Hack to get one of the sizes, we should get all supported sizes for div
+      if(bids[i].timeToRespond>pbjs.cbTimeout){
+        to=1;
+      }
+      var ps={
             "pn": bids[i].bidderCode,
             "bidid": bids[i].adId,
             "db": 0,
@@ -82,18 +84,20 @@ function formatBidResponse(bidResponses){
             "dc": "",
             "l1": bids[i].timeToRespond,
             "l2": 0,
-            "t": 0,
+            "t": to,
             "wb": 0
-        }]
-      }
-      bidinfoarray.push(bidinfo);
-      };
+        };
 
+      psArray.push(ps);
+      }
+      bidinfo["ps"]=psArray;
+      bidinfoarray.push(bidinfo);
       //console.log(key, yourobject[key]);
    }
   }
   logData["s"]=bidinfoarray;
   logData["iid"]=iid;
+  //console.log(logData);
   return logData;
 
 };
