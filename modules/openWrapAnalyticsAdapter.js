@@ -48,8 +48,8 @@ function formatBidResponse(bidResponses){
   var date = new Date();
   var tst = Math.round( date.getTime()/1000 );
   var logData={
-    "pubid": configOptions.publisherId,
-    "to": pbjs.cbTimeout,
+    "pubid": ""+configOptions.publisherId,
+    "to": ""+pbjs.cbTimeout,
     "purl": utils.getTopWindowUrl(),
     "tst": tst,
     "pid": "0",
@@ -84,7 +84,7 @@ function formatBidResponse(bidResponses){
             "dc": "",
             "l1": bids[i].timeToRespond,
             "l2": 0,
-            "t": to,
+            "t": parseInt(to),
             "wb": 0
         };
 
