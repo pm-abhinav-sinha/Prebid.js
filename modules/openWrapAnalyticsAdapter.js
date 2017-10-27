@@ -22,7 +22,7 @@ var openWrapAnalyticsAdapter = Object.assign(adapter(
 
       if (eventType === 'auctionEnd') {//TODO: should use constants
           var protocol = (document.location.protocol === 'https:') ? 'https:' : 'http:';
-          var url=protocol+OPENWRAP_ANALYTICS_URL+"wl/?pubid="+configOptions.publisherId+"&json="+window.encodeURIComponent(JSON.stringify(formatBidResponse(pbjs.getBidResponses())));
+          var url=protocol+OPENWRAP_ANALYTICS_URL+"wl/?pubid="+configOptions.publisherId+"&json="+window.encodeURIComponent(JSON.stringify(formatBidResponse(pbjs.getBidResponses(),pbjs.getHighestCpmBids())));
           setTimeout(function() {
             var img = new window.Image();
             img.src = url;
@@ -44,9 +44,14 @@ var openWrapAnalyticsAdapter = Object.assign(adapter(
   }
 );
 
-function formatBidResponse(bidResponses){
+function formatBidResponse(bidResponses,winningBids){
+  console.log(winningBids);
   var date = new Date();
   var tst = Math.round( date.getTime()/1000 );
+  var pv=0;
+  for (var i = 0; i < winningBids.length; i++) {
+    pv+=winningBids[i].cpm;
+  }
   var logData={
     "pubid": ""+configOptions.publisherId,
     "to": ""+pbjs.cbTimeout,
@@ -54,12 +59,13 @@ function formatBidResponse(bidResponses){
     "tst": tst,
     "pid": "0",
     "pdvid": "0",
-    //"iid": uuid,
+    "pv": pv,
     "src": "2",
     "sv": "prebid"+pbjs.version
   };
   var iid="";
   var bidinfoarray=[];
+
   for (var key in bidResponses) {
    if (bidResponses.hasOwnProperty(key)) {
       var bids=bidResponses[key].bids;
