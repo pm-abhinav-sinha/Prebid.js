@@ -78,6 +78,12 @@ function formatBidResponse(bidResponses,winningBids){
       if(bids[i].timeToRespond>pbjs.cbTimeout){
         to=1;
       }
+        var wb=0;
+        for (var j = 0; j < winningBids.length; j++) {
+          if(winningBids[j].adId===bids[i].adId){
+            wb=1;
+          }
+        }
       var ps={
             "pn": bids[i].bidderCode,
             "bidid": bids[i].adId,
@@ -91,7 +97,7 @@ function formatBidResponse(bidResponses,winningBids){
             "l1": bids[i].timeToRespond,
             "l2": 0,
             "t": parseInt(to),
-            "wb": 0
+            "wb": wb
         };
 
       psArray.push(ps);
@@ -117,7 +123,7 @@ function formatWinBidResponse(bidResponses){
   var bidinfoarray=[];
 
   for (var i = 0; i < bidResponses.length; i++) {
-        var data="pubid="+configOptions.publisherId+"&purl="+ utils.getTopWindowUrl()+"&pwtv=0&profileid=0&tst="+tst+"&iid="+bidResponses[i].requestId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm+"&kgpv="+bidResponses[i].adUnitCode;
+        var data="pubid="+configOptions.publisherId+"&purl="+ utils.getTopWindowUrl()+"&pwtv=0&profileid=0&tst="+tst+"&iid="+bidResponses[i].requestId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm+"&kgpv="+bidResponses[i].adSlot;
         logData[i]=data;
     }
   return logData;
