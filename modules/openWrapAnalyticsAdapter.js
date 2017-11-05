@@ -123,7 +123,7 @@ function formatWinBidResponse(bidResponses){
   var bidinfoarray=[];
 
   for (var i = 0; i < bidResponses.length; i++) {
-        var data="pubid="+configOptions.publisherId+"&purl="+ utils.getTopWindowUrl()+"&pwtv=0&profileid=0&tst="+tst+"&iid="+bidResponses[i].requestId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm+"&kgpv="+bidResponses[i].adSlot;
+        var data="pubid="+configOptions.publisherId+"&purl="+ window.encodeURIComponent(utils.getTopWindowUrl())+"&tst="+tst+"&iid="+bidResponses[i].requestId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm+"&kgpv="+window.encodeURIComponent(bidResponses[i].adSlot);
         logData[i]=data;
     }
   return logData;
