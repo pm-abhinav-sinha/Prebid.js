@@ -88,7 +88,7 @@ function formatBidResponse(bidResponses,winningBids){
             "pn": bids[i].bidderCode,
             "bidid": bids[i].adId,
             "db": 0,
-            "kgpv": bids[i].adSlot,//"/1050432/FE_Across_4th_New_300x250@300x250:0",
+            //"kgpv": bids[i].adSlot,//"/1050432/FE_Across_4th_New_300x250@300x250:0", NOT SUPPORTED in PREBID 1.0
             "psz": bids[i].width+"x"+bids[i].height,
             "eg": bids[i].cpm,
             "en": bids[i].cpm,
@@ -123,7 +123,7 @@ function formatWinBidResponse(bidResponses){
   var bidinfoarray=[];
 
   for (var i = 0; i < bidResponses.length; i++) {
-        var data="pubid="+configOptions.publisherId+"&purl="+ window.encodeURIComponent(utils.getTopWindowUrl())+"&tst="+tst+"&iid="+bidResponses[i].auctionId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm+"&kgpv="+window.encodeURIComponent(bidResponses[i].adSlot);
+        var data="pubid="+configOptions.publisherId+"&purl="+ window.encodeURIComponent(utils.getTopWindowUrl())+"&tst="+tst+"&iid="+bidResponses[i].auctionId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm;
         logData[i]=data;
     }
   return logData;
