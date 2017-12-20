@@ -72,7 +72,7 @@ function formatBidResponse(bidResponses,winningBids){
       var psArray=[];
       var bidinfo={};
       for (var i = 0; i < bidResponses[key].bids.length; i++) {
-      iid=bids[i].auctionId;
+      iid=bids[i].auctionId?bids[i].auctionId:bids[i].requestId;
       var to=0;
       bidinfo={"sn": bids[0].adUnitCode,"sz": [bids[0].width+"x"+bids[0].height]}; // Hack to get one of the sizes, we should get all supported sizes for div
       if(bids[i].timeToRespond>pbjs.cbTimeout){
@@ -123,7 +123,8 @@ function formatWinBidResponse(bidResponses){
   var bidinfoarray=[];
 
   for (var i = 0; i < bidResponses.length; i++) {
-        var data="pubid="+configOptions.publisherId+"&purl="+ window.encodeURIComponent(utils.getTopWindowUrl())+"&tst="+tst+"&iid="+bidResponses[i].auctionId+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm;
+        var impid=bidResponses[i].auctionId?bidResponses[i].auctionId:bidResponses[i].requestId;
+        var data="pubid="+configOptions.publisherId+"&purl="+ window.encodeURIComponent(utils.getTopWindowUrl())+"&tst="+tst+"&iid="+impid+"&bidid="+bidResponses[i].adId+"&pid=0&pdvid=0&slot="+bidResponses[i].adUnitCode+"&pn="+bidResponses[i].bidderCode+"&en="+bidResponses[i].cpm+"&eg="+bidResponses[i].cpm;
         logData[i]=data;
     }
   return logData;
