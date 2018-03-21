@@ -8,5 +8,6 @@
 	"rubiconBidAdapter",
 	"sovrnBidAdapter",
 	"pubmaticBidAdapter",
-	"pubmaticServerBidAdapter"
+	"pubmaticServerBidAdapter",
+	"intelliRecommendation"
 ]
