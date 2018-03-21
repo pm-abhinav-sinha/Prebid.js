@@ -12,7 +12,7 @@ import { auctionManager } from './auctionManager';
 import { targeting } from './targeting';
 import includes from 'core-js/library/fn/array/includes';
 
-var $$PREBID_GLOBAL$$ = getGlobal();
+$$PREBID_GLOBAL$$ = getGlobal();
 
 var CONSTANTS = require('./constants.json');
 var utils = require('./utils.js');

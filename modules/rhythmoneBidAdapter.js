@@ -64,77 +64,19 @@ function RhythmOneBidAdapter() {
       return l;
     }, ''));
 
-    function getRMPUrl() {
-      let url = getFirstParam('endpoint', BRs) || '//tag.1rx.io/rmp/{placementId}/0/{path}?z={zone}';
-      let defaultZone = getFirstParam('zone', BRs) || '1r';
-      let defaultPath = getFirstParam('path', BRs) || 'mvo';
+    configuredPlacements = [];
 
-      url = url.replace(/\{placementId\}/i, fallbackPlacementId);
-      url = url.replace(/\{zone\}/i, defaultZone);
-      url = url.replace(/\{path\}/i, defaultPath);
+    p('hbv', $$PREBID_GLOBAL$$.version.replace(fat, '') + ',' + version.replace(fat, ''));
 
-      p('title', attempt(function() { return w.top.document.title; }, '')); // try/catch is in the attempt function
-      p('dsh', (w.screen ? w.screen.height : ''));
-      p('dsw', (w.screen ? w.screen.width : ''));
-      p('tz', (new Date()).getTimezoneOffset());
-      p('dtype', ((/(ios|ipod|ipad|iphone|android)/i).test(w.navigator.userAgent) ? 1 : ((/(smart[-]?tv|hbbtv|appletv|googletv|hdmi|netcast\.tv|viera|nettv|roku|\bdtv\b|sonydtv|inettvbrowser|\btv\b)/i).test(w.navigator.userAgent) ? 3 : 2)));
-      p('flash', attempt(function() {
-        let n = w.navigator;
-        let p = n.plugins;
-        let m = n.mimeTypes;
-        let t = 'application/x-shockwave-flash';
-        let x = w.ActiveXObject;
+    for (; i < bids.length; i++) {
+      const th = [];
+      const tw = [];
 
-        if (p &&
-          p['Shockwave Flash'] &&
-          m &&
-          m[t] &&
-          m[t].enabledPlugin) {
-          return 1;
-        }
+      if (bids[i].sizes.length > 0 && typeof bids[i].sizes[0] === 'number') { bids[i].sizes = [bids[i].sizes]; }
 
-        if (x) {
-          try {
-            if ((new w.ActiveXObject('ShockwaveFlash.ShockwaveFlash'))) {
-              return 1;
-            }
-          } catch (e) {
-          }
-        }
-
-        return 0;
-      }, 0));
-
-      let heights = [];
-      let widths = [];
-      let floors = [];
-      let mediaTypes = [];
-      let i = 0;
-      let configuredPlacements = [];
-      let fat = /(^v|(\.0)+$)/gi;
-
-      p('hbv', w.$$PREBID_GLOBAL$$.version.replace(fat, '') + ',' + version.replace(fat, ''));
-
-      for (; i < BRs.length; i++) {
-        let th = [];
-        let tw = [];
-        let params = BRs[i].params || {};
-
-        slotsToBids[BRs[i].adUnitCode || BRs[i].placementCode] = BRs[i];
-
-        if (BRs[i].sizes.length > 0 && typeof BRs[i].sizes[0] === 'number') {
-          BRs[i].sizes = [BRs[i].sizes];
-        }
-
-        for (let j = 0; j < BRs[i].sizes.length; j++) {
-          tw.push(BRs[i].sizes[j][0]);
-          th.push(BRs[i].sizes[j][1]);
-        }
-        configuredPlacements.push(BRs[i].adUnitCode || BRs[i].placementCode);
-        heights.push(th.join('|'));
-        widths.push(tw.join('|'));
-        mediaTypes.push((BRs[i].mediaTypes && BRs[i].mediaTypes.video ? 'v' : 'd'));
-        floors.push(params.floor || 0);
+      for (var j = 0; j < bids[i].sizes.length; j++) {
+        tw.push(bids[i].sizes[j][0]);
+        th.push(bids[i].sizes[j][1]);
       }
 
       p('imp', configuredPlacements);
@@ -145,7 +87,43 @@ function RhythmOneBidAdapter() {
 
       url += '&' + query.join('&') + '&';
 
-      return url;
+    return endpoint;
+  }
+
+  function sendAuditBeacon(placementId) {
+    const data = {
+      doc_version: 1,
+      doc_type: 'Prebid Audit',
+      placement_id: placementId
+    };
+    const ao = document.location.ancestorOrigins;
+    const q = [];
+    const u = '//hbevents.1rx.io/audit?';
+    const i = new Image();
+
+    if (ao && ao.length > 0) {
+      data.ancestor_origins = ao[ao.length - 1];
+    }
+
+    data.popped = window.opener !== null ? 1 : 0;
+    data.framed = window.top === window ? 0 : 1;
+
+    try {
+      data.url = window.top.document.location.href.toString();
+    } catch (ex) {
+      data.url = window.document.location.href.toString();
+    }
+
+    var prebid_instance = $$PREBID_GLOBAL$$;
+
+    data.prebid_version = prebid_instance.version.replace(fat, '');
+    data.response_ms = (new Date()).getTime() - loadStart;
+    data.placement_codes = configuredPlacements.join(',');
+    data.bidder_version = version;
+    data.prebid_timeout = prebid_instance.cbTimeout || config.getConfig('bidderTimeout');
+
+    for (var k in data) {
+      q.push(encodeURIComponent(k) + '=' + encodeURIComponent((typeof data[k] === 'object' ? JSON.stringify(data[k]) : data[k])));
     }
 
     return [{

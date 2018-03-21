@@ -66,8 +66,30 @@ export const spec = {
     }
   }
 
-};
-registerBidder(spec);
+  function buildTrionUrl(bid, bidId) {
+    var pubId = utils.getBidIdParameter('pubId', bid.params);
+    var sectionId = utils.getBidIdParameter('sectionId', bid.params);
+    var re = utils.getBidIdParameter('re', bid.params);
+    var url = utils.getTopWindowUrl();
+    var sizes = utils.parseSizesInput(bid.sizes).join(',');
+
+    var trionUrl = BID_REQUEST_BASE_URL;
+
+    trionUrl = utils.tryAppendQueryString(trionUrl, 'callback', preBidNameSpace + '.handleTrionCB');
+    trionUrl = utils.tryAppendQueryString(trionUrl, 'bidId', bidId);
+    trionUrl = utils.tryAppendQueryString(trionUrl, 'pubId', pubId);
+    trionUrl = utils.tryAppendQueryString(trionUrl, 'sectionId', sectionId);
+    trionUrl = utils.tryAppendQueryString(trionUrl, 're', re);
+    trionUrl = utils.tryAppendQueryString(trionUrl, 'slot', bid.placementCode);
+    if (url) {
+      trionUrl += 'url=' + url + '&';
+    }
+    if (sizes) {
+      trionUrl += 'sizes=' + sizes + '&';
+    }
+    if (userTag) {
+      trionUrl += 'tag=' + encodeURIComponent(JSON.stringify(userTag)) + '&';
+    }
 
 function getSyncUrl() {
   var unParsedPubAndSection = getStorageData(BASE_KEY + 'lps') || ':';

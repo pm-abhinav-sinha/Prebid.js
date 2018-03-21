@@ -32,6 +32,7 @@ export const spec = {
     let videoRequests = [];
     let bannerBids = [];
     let videoBids = [];
+
     bids.forEach(function (bid) {
       if (bid.mediaType === VIDEO) {
         videoBids.push(bid);

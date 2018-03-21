@@ -39,6 +39,7 @@ export const spec = {
         page: window.location.pathname + location.search + location.hash
       }
     };
+
     return {
       method: 'POST',
       url: `//ap.lijit.com/rtb/bid?src=${REPO_AND_VERSION}`,

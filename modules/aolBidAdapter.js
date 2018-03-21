@@ -206,8 +206,8 @@ function _parseBidResponse(response, bidRequest) {
     if (config.getConfig('aol.userSyncOn') !== constants.EVENTS.BID_RESPONSE) {
       let formattedPixels = response.ext.pixels.replace(/<\/?script( type=('|")text\/javascript('|")|)?>/g, '');
 
-      ad += '<script>if(!parent.$$PREBID_GLOBAL$$.aolGlobals.pixelsDropped){' +
-        'parent.$$PREBID_GLOBAL$$.aolGlobals.pixelsDropped=true;' + formattedPixels +
+      ad += '<script>if(!parent.' + preBidNameSpace + '.aolGlobals.pixelsDropped){' +
+        'parent.' + preBidNameSpace + '.aolGlobals.pixelsDropped=true;' + formattedPixels +
         '}</script>';
     }
   }

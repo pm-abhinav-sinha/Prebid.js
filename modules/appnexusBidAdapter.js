@@ -74,29 +74,33 @@ export const spec = {
     if (member > 0) {
       payload.member_id = member;
     }
-    const payloadString = JSON.stringify(payload);
-    return {
-      method: 'POST',
-      url: URL,
-      data: payloadString,
-      bidderRequest
-    };
-  },
+  };
 
-  /**
-   * Unpack the response from the server into a list of bids.
-   *
-   * @param {*} serverResponse A successful response from the server.
-   * @return {Bid[]} An array of bids which were nested inside the server.
-   */
-  interpretResponse: function(serverResponse, {bidderRequest}) {
-    serverResponse = serverResponse.body;
-    const bids = [];
-    if (!serverResponse || serverResponse.error) {
-      let errorMessage = `in response for ${bidderRequest.bidderCode} adapter`;
-      if (serverResponse && serverResponse.error) { errorMessage += `: ${serverResponse.error}`; }
-      utils.logError(errorMessage);
-      return bids;
+  function buildJPTCall(bid, callbackId) {
+    // determine tag params
+    var placementId = utils.getBidIdParameter('placementId', bid.params);
+
+    // memberId will be deprecated, use member instead
+    var memberId = utils.getBidIdParameter('memberId', bid.params);
+    var member = utils.getBidIdParameter('member', bid.params);
+    var inventoryCode = utils.getBidIdParameter('invCode', bid.params);
+    var query = utils.getBidIdParameter('query', bid.params);
+    var referrer = utils.getBidIdParameter('referrer', bid.params);
+    var altReferrer = utils.getBidIdParameter('alt_referrer', bid.params);
+    let usePaymentRule = utils.getBidIdParameter('usePaymentRule', bid.params);
+    var jptCall = '//ib.adnxs.com/jpt?';
+
+    jptCall = utils.tryAppendQueryString(jptCall, 'callback', preBidNameSpace + '.handleAnCB');
+    jptCall = utils.tryAppendQueryString(jptCall, 'callback_uid', callbackId);
+    jptCall = utils.tryAppendQueryString(jptCall, 'psa', '0');
+    jptCall = utils.tryAppendQueryString(jptCall, 'id', placementId);
+    jptCall = utils.tryAppendQueryString(jptCall, 'use_pmt_rule', usePaymentRule);
+
+    if (member) {
+      jptCall = utils.tryAppendQueryString(jptCall, 'member', member);
+    } else if (memberId) {
+      jptCall = utils.tryAppendQueryString(jptCall, 'member', memberId);
+      utils.logMessage('appnexus.callBids: "memberId" will be deprecated soon. Please use "member" instead');
     }
 
     if (serverResponse.tags) {
@@ -387,36 +391,14 @@ function buildNativeRequest(params) {
     }
   });
 
-  return request;
-}
-
-function outstreamRender(bid) {
-  // push to render queue because ANOutstreamVideo may not be loaded yet
-  bid.renderer.push(() => {
-    window.ANOutstreamVideo.renderAd({
-      tagId: bid.adResponse.tag_id,
-      sizes: [bid.getSize().split('x')],
-      targetId: bid.adUnitCode, // target div id to render video
-      uuid: bid.adResponse.uuid,
-      adResponse: bid.adResponse,
-      rendererOptions: bid.renderer.getConfig()
-    }, handleOutstreamRendererEvents.bind(null, bid));
-  });
-}
-
-function handleOutstreamRendererEvents(bid, id, eventName) {
-  bid.renderer.handleVideoEvent({ id, eventName });
-}
-
-function parseMediaType(rtbBid) {
-  const adType = rtbBid.ad_type;
-  if (adType === 'video') {
-    return 'video';
-  } else if (adType === 'native') {
-    return 'native';
-  } else {
-    return 'banner';
-  }
-}
+adaptermanager.registerBidAdapter(new AppNexusAdapter(), 'appnexus');
+adaptermanager.aliasBidAdapter('appnexus', 'brealtime');
+adaptermanager.aliasBidAdapter('appnexus', 'pagescience');
+adaptermanager.aliasBidAdapter('appnexus', 'defymedia');
+adaptermanager.aliasBidAdapter('appnexus', 'gourmetads');
+adaptermanager.aliasBidAdapter('appnexus', 'matomy');
+adaptermanager.aliasBidAdapter('appnexus', 'featureforward');
+adaptermanager.aliasBidAdapter('appnexus', 'oftmedia');
+adaptermanager.aliasBidAdapter('appnexus', 'districtm');
 
 registerBidder(spec);
